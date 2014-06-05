@@ -35,17 +35,17 @@ You probably already have a DHCP server in your network and if so you really don
 
 <b>Windows Server</b>
 
-a) Go to Start -> Administrative Tools -> DHCP
-b) Expand applicable scope
-c) Right click Scope Options -> Configure Options
-d) Add option 066 -> 10.50.0.115
-e) Add option 067 -> pxelinux.0
+a) Go to Start -> Administrative Tools -> DHCP<br/>
+b) Expand applicable scope<br/>
+c) Right click Scope Options -> Configure Options<br/>
+d) Add option 066 -> 10.50.0.115<br/>
+e) Add option 067 -> pxelinux.0<br/>
 
 <b>Linux DHCP Server</b>
-a)	Edit your dhcpd.conf
-b)	Depending on your configuration add to the global section of your subnet or to single host two entries:
-next-server 10.50.0.115;
-filename “pxelinux.0”
+a)	Edit your dhcpd.conf<br/>
+b)	Depending on your configuration add to the global section of your subnet or to single host two entries:<br/>
+next-server 10.50.0.115;<br/>
+filename “pxelinux.0”<br/>
 
 If you want to limit hosts which would be able to boot via PXE you could configure TechUSB for single host by mac-address:
 host TechUSB-Client {
