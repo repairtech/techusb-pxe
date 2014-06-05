@@ -1,0 +1,139 @@
+#!/bin/bash
+
+clear
+
+function usage() {
+	echo -e "\e[00;32m"
+	echo -e "Script usage:"
+	echo -e "${0} <path to techusb.iso> <path to minirtpxe.gz> <ip at which clients will contact this nfs server>"
+	echo -e "eg.: ${0} /root/techusb.iso /root/minirtpxe.gz 192.168.0.100"
+	echo -e ""
+	echo -e "\e[00m"
+	exit -1
+}
+
+function valid_ip()
+{
+    local  ip=$1
+    local  stat=1
+
+    if [[ $ip =~ ^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$ ]]; then
+        OIFS=$IFS
+        IFS='.'
+        ip=($ip)
+        IFS=$OIFS
+        [[ ${ip[0]} -le 255 && ${ip[1]} -le 255 \
+            && ${ip[2]} -le 255 && ${ip[3]} -le 255 ]]
+        stat=$?
+    fi
+    return $stat
+}
+
+TFTPDIR="/srv/tftp"
+
+ISO="${1}"
+INITRD="${2}"
+NFSIP="${3}"
+
+MNTDIR="/tmp/techusb"
+
+if [[ -z "${ISO}" || -z "${NFSIP}" || -z "${INITRD}" ]]; then
+	usage
+fi
+
+if [[ -f /etc/debian_version ]]; then
+	DEBVER=`cat /etc/debian_version`
+else
+	DEBVER="0"
+fi
+
+if [[ ${DEBVER} != "7.5" ]]; then
+	echo "This script was written for Debian 7.5"
+	echo ""
+	echo "Do you wish to continue anyway? [y|n]"
+	
+	while read answer; do
+	if [[ "${answer}" == "y" ]]; then
+		break
+	fi
+
+	if [[ "${answer}" == "n" ]]; then
+		exit -1
+	fi
+	
+	done
+fi
+
+### PREPARE DEBIAN ENVIRONMENT ###
+
+aptitude -y install nfs-kernel-server tftpd file syslinux-common
+
+### Check arguments ###
+
+file ${ISO} | grep -i "ISO 9660" &> /dev/null
+if [[ $? -ne 0 ]]; then
+	echo "${ISO} is not valid .iso file"
+	exit -1
+fi
+
+file ${INITRD} | grep -i "gzip compressed" &> /dev/null
+if [[ $? -ne 0 ]]; then
+	echo "${INITRD} is not valid gzip package"
+	exit -1
+fi
+
+valid_ip ${NFSIP}
+if [[ $? -ne 0 ]]; then
+	echo "${NFSIP} is not valid ip address"
+	exit -1
+fi
+
+echo -e "\e[00;31m"
+echo -e "!!! WARNING !!!"
+echo -e "This script will erase all your data from ${TFTPDIR} directory"
+echo -e "Do you want to continue? [y|n]"
+echo -e "\e[00m"
+
+while read answer; do
+	if [[ "${answer}" == "y" ]]; then
+		break
+	fi
+
+	if [[ "${answer}" == "n" ]]; then
+		exit -1
+	fi
+done
+
+### MOUNT LOOP AND PREPARE ${TFTPDIR} ###
+
+mkdir ${MNTDIR} &> /dev/null
+mount -o loop ${ISO} ${MNTDIR} &> /dev/null
+if [[ $? -ne 0 ]]; then
+	echo "Cannot mount iso file"
+	exit -1
+fi
+
+rm -fr ${TFTPDIR}
+
+mkdir ${TFTPDIR} &> /dev/null
+mkdir ${TFTPDIR}/pxelinux.cfg &> /dev/null
+mkdir ${TFTPDIR}/techusb &> /dev/null
+
+cp ${MNTDIR}/boot/isolinux/* ${TFTPDIR}/
+mv ${TFTPDIR}/isolinux.cfg ${TFTPDIR}/pxelinux.cfg/default
+cp ${INITRD} ${TFTPDIR}/minirtpxe.gz
+cp /usr/lib/syslinux/pxelinux.0 ${TFTPDIR}
+cp -a ${MNTDIR}/KNOPPIX ${TFTPDIR}/techusb
+
+sed -i "s@APPEND\ ramdisk_size@APPEND\ nfsdir=${NFSIP}:${TFTPDIR}/techusb nodhcp ramdisk_size@g" ${TFTPDIR}/knoppix.menu
+sed -i "s/minirt.gz/minirtpxe.gz/g" ${TFTPDIR}/knoppix.menu
+
+cat /etc/exports | grep techusb &> /dev/null
+if [[ $? -ne 0 ]]; then
+	echo "${TFTPDIR}/techusb       *(ro,no_root_squash,async,no_subtree_check)" >> /etc/exports
+fi
+exportfs -a
+/etc/init.d/nfs-kernel-server restart
+/etc/init.d/openbsd-inetd restart
+
+umount /tmp/techusb
