@@ -36,7 +36,7 @@ root@techusb:~#   ./techusb.pxe techusb.iso minirtpxe.gz 10.50.0.115<br/>
 <li>DHCP configuration<br/>
 You probably already have a DHCP server in your network and if so you really don’t want to set up another one. Below are examples for how to configure two of the most popular DHCP servers for PXE boot with TechUSB:<br/>
 
-<b>Windows Server</b><br/><br/>
+<br/><b>Windows Server</b><br/>
 
 a) Go to Start -> Administrative Tools -> DHCP<br/>
 b) Expand applicable scope<br/>
@@ -44,19 +44,19 @@ c) Right click Scope Options -> Configure Options<br/>
 d) Add option 066 -> 10.50.0.115<br/>
 e) Add option 067 -> pxelinux.0<br/>
 
-<b>Linux DHCP Server</b><br/><br/>
+<br/><b>Linux DHCP Server</b><br/>
 a)	Edit your dhcpd.conf<br/>
 b)	Depending on your configuration add to the global section of your subnet or to single host two entries:<br/>
 next-server 10.50.0.115;<br/>
 filename “pxelinux.0”<br/>
 
 If you want to limit hosts which would be able to boot via PXE you could configure TechUSB for single host by mac-address:
-host TechUSB-Client {
-hardware ethernet 00:1C:C4:C6:A3:01;
-fixed-address 10.50.0.116;
-next-server 10.50.0.115;
-filename "pxelinux.0";
-}
+<br/><br/>host TechUSB-Client {<br/>
+&nbsp;&nbsp;hardware ethernet 00:1C:C4:C6:A3:01;<br/>
+&nbsp;&nbsp;fixed-address 10.50.0.116;<br/>
+&nbsp;&nbsp;next-server 10.50.0.115;<br/>
+&nbsp;&nbsp;filename "pxelinux.0";<br/>
+}<br/><br/>
 c)	Restart your dhcp server
 </li>
 <li>Configure your client PC or laptop to boot via PXE. You can do so by changing the boot priority in the BIOS, or depending on your hardware you also could choose one-time boot process selection by pressing the special function key just after powering on ( most common are F9 or F12 ) and choosing the network card. After that you should get an IP Address from your DHCP server and a few seconds later you should get a nice TechUSB boot menu.
