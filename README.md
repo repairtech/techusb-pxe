@@ -61,7 +61,7 @@ c)	Restart your dhcp server
 <li>Configure your client PC or laptop to boot via PXE. You can do so by changing the boot priority in the BIOS, or depending on your hardware you also could choose one-time boot process selection by pressing the special function key just after powering on ( most common are F9 or F12 ) and choosing the network card. After that you should get an IP Address from your DHCP server and a few seconds later you should get a nice TechUSB boot menu.
 </li></ol>
 
-<h3>Other helpful files:</h3>
-We've included the resulting knoppix.menu file and minirtpxe.gz in the git repo so that you can see what our syslinux entries look like for booting. This should help if you already have an existing PXE system and want to modify it, instead of using the techusb.pxe script.
+<h3>Syslinux/Synology Example Files:</h3>
+We've included example syslinux and synology files, and the minirtpxe.gz in the git repo so that you can see what our menu entries look like for booting. This should help if you already have an existing PXE system and want to modify it, instead of using the techusb.pxe script. It's worth noting that the version of synology that we tested with was 4.2. 
 
 If you have any questions feel free to shoot us an email at <a href="mailto:support@repairtechsolutions.com">support@repairtechsolutions.com</a>.
