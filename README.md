@@ -28,9 +28,9 @@ For the purposes of this tutorial this server will have ip address 10.50.0.115 a
 - techusb.pxe<br/>
 </li>
 <li>
-Execute the preparation script, pass as parameters: path to iso file, path to minirtpxe.gz file, nfs ip address for our clients, and path to tmp folder you want to use for mounting:<br/>
+Execute the preparation script, pass as parameters: path to iso file, path to minirtpxe.gz file, nfs ip address for our clients, path to the pxe server folder, and path to tmp folder you want to use for mounting:<br/>
 root@techusb:~#   chmod +x techusb.pxe<br/>
-root@techusb:~#   ./techusb.pxe techusb.iso minirtpxe.gz 10.50.0.115 /tmp/techusb<br/>
+root@techusb:~#   ./techusb.pxe techusb.iso minirtpxe.gz 10.50.0.115 /srv/tftp /tmp/techusb<br/>
 </li>
 <li>DHCP configuration<br/>
 You probably already have a DHCP server in your network and if so you really don’t want to set up another one. Below are examples for how to configure two of the most popular DHCP servers for PXE boot with TechUSB:<br/>
