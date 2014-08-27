@@ -12,9 +12,8 @@ If you want to further customize your PXE installation to better fit your enviro
 <ol>
 <li>TechUSB installation files found here ( <a href="https://8a460776177d49c765ce-a2065d3226b6f083a3fe1d53a8aa037e.ssl.cf1.rackcdn.com/techusb.iso">techusb.iso</a>, <a href="https://8a460776177d49c765ce-a2065d3226b6f083a3fe1d53a8aa037e.ssl.cf1.rackcdn.com/minirtpxe.gz">minirtpxe.gz</a>, <a href="https://8a460776177d49c765ce-a2065d3226b6f083a3fe1d53a8aa037e.ssl.cf1.rackcdn.com/techusb.pxe">techusb.pxe</a>)
 </li>
-<li>	Fresh installation of Debian 7.5
-You can download it here:
-http://cdimage.debian.org/debian-cd/7.5.0/amd64/iso-cd/debian-7.5.0-amd64-netinst.iso
+<li>A linux server able to serve booting to a generic PXE environment with a simple syslinux.cfg file.<br />
+We used debian 7.5 64-bit.
 <br/><br/>
 For the purposes of this tutorial this server will have ip address 10.50.0.115 and has already been configured for internet access.
 </li>
@@ -29,9 +28,9 @@ For the purposes of this tutorial this server will have ip address 10.50.0.115 a
 - techusb.pxe<br/>
 </li>
 <li>
-Execute the preparation script, pass as parameters: path to iso file, path to minirtpxe.gz file and nfs ip address for our clients:<br/>
+Execute the preparation script, pass as parameters: path to iso file, path to minirtpxe.gz file, nfs ip address for our clients, and path to tmp folder you want to use for mounting:<br/>
 root@techusb:~#   chmod +x techusb.pxe<br/>
-root@techusb:~#   ./techusb.pxe techusb.iso minirtpxe.gz 10.50.0.115<br/>
+root@techusb:~#   ./techusb.pxe techusb.iso minirtpxe.gz 10.50.0.115 /tmp/techusb<br/>
 </li>
 <li>DHCP configuration<br/>
 You probably already have a DHCP server in your network and if so you really don’t want to set up another one. Below are examples for how to configure two of the most popular DHCP servers for PXE boot with TechUSB:<br/>
