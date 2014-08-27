@@ -5,8 +5,8 @@ clear
 function usage() {
 	echo -e "\e[00;32m"
 	echo -e "Script usage:"
-	echo -e "${0} <path to techusb.iso> <path to minirtpxe.gz> <ip at which clients will contact this nfs server>"
-	echo -e "eg.: ${0} /root/techusb.iso /root/minirtpxe.gz 192.168.0.100"
+	echo -e "${0} <path to techusb.iso> <path to minirtpxe.gz> <ip at which clients will contact this nfs server> <path to pxe root folder> <temp folder>"
+	echo -e "eg.: ${0} /root/techusb.iso /root/minirtpxe.gz 192.168.0.100 /srv/tftp /tmp/techusb"
 	echo -e ""
 	echo -e "\e[00m"
 	exit -1
@@ -30,43 +30,19 @@ function valid_ip()
 }
 
 TFTPDIR="/srv/tftp"
+MNTDIR="/tmp/techusb"
 
 ISO="${1}"
 INITRD="${2}"
 NFSIP="${3}"
+TFTPDIR="${4}"
+MNTDIR="${5}"
 
-MNTDIR="/tmp/techusb"
 
 if [[ -z "${ISO}" || -z "${NFSIP}" || -z "${INITRD}" ]]; then
 	usage
 fi
 
-if [[ -f /etc/debian_version ]]; then
-	DEBVER=`cat /etc/debian_version`
-else
-	DEBVER="0"
-fi
-
-if [[ ${DEBVER} != "7.5" ]]; then
-	echo "This script was written for Debian 7.5"
-	echo ""
-	echo "Do you wish to continue anyway? [y|n]"
-	
-	while read answer; do
-	if [[ "${answer}" == "y" ]]; then
-		break
-	fi
-
-	if [[ "${answer}" == "n" ]]; then
-		exit -1
-	fi
-	
-	done
-fi
-
-### PREPARE DEBIAN ENVIRONMENT ###
-
-aptitude -y install nfs-kernel-server tftpd file syslinux-common
 
 ### Check arguments ###
 
@@ -123,7 +99,7 @@ cp ${MNTDIR}/boot/isolinux/* ${TFTPDIR}/
 mv ${TFTPDIR}/isolinux.cfg ${TFTPDIR}/pxelinux.cfg/default
 cp ${INITRD} ${TFTPDIR}/minirtpxe.gz
 cp /usr/lib/syslinux/pxelinux.0 ${TFTPDIR}
-cp -a ${MNTDIR}/KNOPPIX ${TFTPDIR}/techusb
+cp -a ${MNTDIR}/KNOPPIX ${TFTPDIR}/techusb/
 
 sed -i "s@APPEND\ ramdisk_size@APPEND\ nfsdir=${NFSIP}:${TFTPDIR}/techusb nodhcp ramdisk_size@g" ${TFTPDIR}/knoppix.menu
 sed -i "s/minirt.gz/minirtpxe.gz/g" ${TFTPDIR}/knoppix.menu
@@ -136,4 +112,4 @@ exportfs -a
 /etc/init.d/nfs-kernel-server restart
 /etc/init.d/openbsd-inetd restart
 
-umount /tmp/techusb
+umount ${MNTDIR}
